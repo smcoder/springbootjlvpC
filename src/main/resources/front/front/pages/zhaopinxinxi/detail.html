@@ -33,6 +33,32 @@
 			.description img{
 				width: 100%;
 			}
+			.gangweiyaoqiu {
+				width: 400px;
+				height: 200px;/*高度固定*/
+				overflow: hidden;
+				text-overflow: ellipsis;
+				display: -webkit-box;
+				-webkit-line-clamp: 3;/*三行省略*/
+				-webkit-box-orient: vertical;
+				font-size: 14px;
+				color: #545c63;
+				line-height: 28px;
+				transition: all .1s;
+			}
+			.gangweiyaoqiu:hover {
+				background: #fff;
+				height: auto; /*设置一个最小高度，实际高度自动*/
+				min-height: 78px;
+				position: relative;
+				z-index: 5;
+				padding: 10px;
+				margin-top: -10px;
+				margin-left: -10px;
+				border-radius: 8px;
+				box-shadow: 0 8px 16px 0 rgba(7, 17, 27, .2); /*加阴影*/
+				-webkit-line-clamp: inherit; /*去掉省略*/
+			}
 		</style>
 	</head>
 	<body>
@@ -87,7 +113,7 @@
 											<h4>招聘人数：{{detail.zhaopinrenshu}}</h4>
 											<h4>岗位类别：{{detail.gangweileibie}}</h4>
 											<h4>学历：{{detail.xueli}}</h4>
-											<h4>岗位要求：{{detail.gangweiyaoqiu}}</h4>
+											<h4>岗位要求：<div class="gangweiyaoqiu">{{detail.gangweiyaoqiu}}</div></h4>
 											<h4>企业地址：{{detail.address}}</h4>
 											<h4>截止时间：{{detail.endTime}}</h4>
 											<p class="rating">
@@ -186,6 +212,7 @@
 					comments: [],
 					comment: "",
 					buttons: [],
+					duoyu: false,
 				},
 				async created() {
 					var frontmenus = JSON.parse(localStorage.getItem("daohangmenus"))
@@ -277,9 +304,13 @@
 					getDetail(id){
 						return new Promise((resolve) => {
 							goodsInfo('zhaopinxinxi',id, (res) => {
+								// let gangweiyaoqiu = res.data.gangweiyaoqiu;
+								// if (gangweiyaoqiu.length > 30) {
+								// 	this.duoyu = true;
+								// 	res.data.gangweiyaoqiu = res.data.gangweiyaoqiu.substring(0, 10);
+								// }
 								this.detail = res.data
 								this.$nextTick(() => {
-									
 									this.swiperList = []
 									var arr = this.detail.tupian.split(',')
 									arr.forEach(item => {

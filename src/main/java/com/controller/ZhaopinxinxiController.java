@@ -12,9 +12,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.entity.*;
+import com.entity.vo.ZhaopinxinxiEntityVO;
 import com.service.*;
 import com.utils.ValidatorUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,18 +74,15 @@ public class ZhaopinxinxiController {
         QiyexinxiEntity qiye = qiyexinxiService.selectById(id);
         int role = -1;
         if (qiye != null){
-            zhaopinxinxi.setStatus(1);
             role = 2;
         } else if (yonghu != null) {
-            zhaopinxinxi.setStatus(1);
             role = 0;
         } else {
             role = 1;
-            zhaopinxinxi.setStatus(0);
         }
 
         EntityWrapper<ZhaopinxinxiEntity> ew = new EntityWrapper<ZhaopinxinxiEntity>();
-        ew.eq("status", zhaopinxinxi.getStatus());
+//        ew.eq("status", zhaopinxinxi.getStatus());
 		PageUtils page = zhaopinxinxiService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, zhaopinxinxi), params), params), role);
 
         return R.ok().put("data", page);
@@ -96,6 +95,7 @@ public class ZhaopinxinxiController {
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params,ZhaopinxinxiEntity zhaopinxinxi, HttpServletRequest request){
         EntityWrapper<ZhaopinxinxiEntity> ew = new EntityWrapper<ZhaopinxinxiEntity>();
+        ew.eq("status", "是");
 		PageUtils page = zhaopinxinxiService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, zhaopinxinxi), params), params), 2);
         return R.ok().put("data", page);
     }
@@ -130,13 +130,13 @@ public class ZhaopinxinxiController {
         return R.ok().put("data", zhaopinxinxi);
     }
 
-    @RequestMapping("/verify/{id}/{status}")
-    public R verify(@PathVariable("id") String id, @PathVariable("status") Integer status) {
-        ZhaopinxinxiEntity zhaopinxinxi = zhaopinxinxiService.selectById(id);
-        zhaopinxinxi.setStatus(status);
-        zhaopinxinxiService.updateById(zhaopinxinxi);
-     return R.ok();
-    }
+//    @RequestMapping("/verify/{id}/{status}")
+//    public R verify(@PathVariable("id") String id, @PathVariable("status") Integer status) {
+//        ZhaopinxinxiEntity zhaopinxinxi = zhaopinxinxiService.selectById(id);
+//        zhaopinxinxi.setStatus(status);
+//        zhaopinxinxiService.updateById(zhaopinxinxi);
+//     return R.ok();
+//    }
 
     @Autowired
     private StoreupService storeupService;
@@ -160,8 +160,12 @@ public class ZhaopinxinxiController {
         }else {
             zhaopinxinxi.setShouchang(true);
         }
-
-        return R.ok().put("data", zhaopinxinxi);
+        ZhaopinxinxiEntityVO vo = new ZhaopinxinxiEntityVO();
+        BeanUtils.copyProperties(zhaopinxinxi, vo);
+        if (StringUtils.isNotBlank(zhaopinxinxi.getEndTime())) {
+            vo.setEndTime(vo.getEndTime().substring(0, vo.getEndTime().indexOf("T")));
+        }
+        return R.ok().put("data", vo);
     }
     
 
@@ -187,8 +191,6 @@ public class ZhaopinxinxiController {
     @RequestMapping("/save")
     public R save(@RequestBody ZhaopinxinxiEntity zhaopinxinxi, HttpServletRequest request){
     	zhaopinxinxi.setId(new Date().getTime()+new Double(Math.floor(Math.random()*1000)).longValue());
-    	//ValidatorUtils.validateEntity(zhaopinxinxi);
-        zhaopinxinxi.setStatus(0);
         zhaopinxinxiService.insert(zhaopinxinxi);
         return R.ok();
     }
