@@ -139,9 +139,8 @@
               align="center"
               sortable
               label="审核">
-            <template slot-scope="scope">
-              <span style="margin-right:10px">{{scope.row.sfsh=='是'?'通过':'未通过'}}</span>
-              <el-button  v-if="scope.row.role == 1" type="text" icon="el-icon-edit" size="small" @click="shDialog(scope.row)">审核</el-button>
+              <template slot-scope="scope">
+            <span style="margin-right:10px">{{scope.row.sfsh=='是'?'通过':'未通过'}}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -149,9 +148,10 @@
               align="center"
               label="操作">
             <template slot-scope="scope">
-              <el-button v-if="scope.row.role==0" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id,'info')">详情</el-button>
-              <el-button v-if="scope.row.role==0" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id)">修改</el-button>
-              <el-button v-if="scope.row.role==0" type="text" icon="el-icon-delete" size="small" @click="deleteHandler(scope.row.id)">删除</el-button>
+              <el-button v-if="scope.row.role==0" type="text" icon="el-icon-edit" size="small" @click="shDialog(scope.row)">审核</el-button>
+              <el-button v-if="scope.row.role==0 || scope.row.role == 1 || scope.row.role == 2" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id,'info')">详情</el-button>
+              <el-button v-if="scope.row.role==0 || scope.row.role == 2" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id)">修改</el-button>
+              <el-button v-if="scope.row.role==0 || scope.row.role == 2" type="text" icon="el-icon-delete" size="small" @click="deleteHandler(scope.row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>

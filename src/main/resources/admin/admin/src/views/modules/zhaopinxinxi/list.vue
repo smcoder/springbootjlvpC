@@ -170,25 +170,43 @@
                     prop="gangweiyaoqiu"
                     header-align="center"
                     align="center"
+                    :show-overflow-tooltip="true"
                     sortable
                     label="岗位要求">
                     <template slot-scope="scope">
                       {{scope.row.gangweiyaoqiu}}
                     </template>
                 </el-table-column>
-                                                                                                                                                                                        <el-table-column
+
+                <el-table-column
+                              prop="shhf"
+                              header-align="center"
+                              align="center"
+                              sortable
+                              label="审核回复">
+                          </el-table-column>
+                          <el-table-column
+                              prop="sfsh"
+                              header-align="center"
+                              align="center"
+                              sortable
+                              label="审核">
+                              <template slot-scope="scope">
+                            <span style="margin-right:10px">{{scope.row.status=='是'?'通过':'未通过'}}</span>
+                            </template>
+                          </el-table-column>
+
+
+                <el-table-column
                 header-align="center"
                 align="center"
                 label="操作">
                 <template slot-scope="scope">
-                    <el-button v-if="scope.row.role == 0" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id,'info')">详情</el-button>
-                    <el-button v-if="scope.row.role == 0" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id)">修改</el-button>
-                    <el-button v-if="scope.row.role == 0" type="text" icon="el-icon-delete" size="small" @click="deleteHandler(scope.row.id)">删除</el-button>
+                    <el-button v-if="scope.row.role == 2" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id)">修改</el-button>
+                    <el-button v-if="scope.row.role == 2 && '' == scope.row.status" type="text" icon="el-icon-delete" size="small" @click="deleteHandler(scope.row.id)">删除</el-button>
 
-
-                    <el-button v-if="scope.row.role == 1" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id,'info')">详情</el-button>
-                    <el-button v-if="scope.row.role == 1" type="text" icon="el-icon-edit" size="small" @click="verify(scope.row.id,'pass')">通过</el-button>
-                    <el-button v-if="scope.row.role == 1" type="text" icon="el-icon-edit" size="small" @click="verify(scope.row.id,'reject')">拒绝</el-button>
+                    <el-button v-if="scope.row.role==1 || scope.row.role == 2" type="text" icon="el-icon-edit" size="small" @click="addOrUpdateHandler(scope.row.id,'info')">详情</el-button>
+                     <el-button v-if="scope.row.role==1" type="text" icon="el-icon-edit" size="small" @click="shDialog(scope.row)">审核</el-button>
                 </template>
 
             </el-table-column>
@@ -210,7 +228,30 @@
 
             <yingpinxinxi-cross-add-or-update v-if="yingpinxinxiCrossAddOrUpdateFlag" :parent="this" ref="yingpinxinxiCrossaddOrUpdate"></yingpinxinxi-cross-add-or-update>
         
-    
+
+
+
+
+    <el-dialog
+            title="审核"
+            :visible.sync="sfshVisiable"
+            width="50%">
+          <el-form ref="form" :model="form" label-width="80px">
+            <el-form-item label="审核状态">
+              <el-select v-model="shForm.status" placeholder="审核状态">
+                <el-option label="通过" value="是"></el-option>
+                <el-option label="不通过" value="否"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="内容">
+              <el-input type="textarea" :rows="8" v-model="shForm.shhf"></el-input>
+            </el-form-item>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="shDialog">取 消</el-button>
+            <el-button type="primary" @click="shHandler">确 定</el-button>
+          </span>
+        </el-dialog>
     
   </div>
 </template>
@@ -289,6 +330,62 @@ export default {
       this.pageIndex = 1;
       this.getDataList();
     },
+    // 审核窗口
+    shDialog(row){
+      this.sfshVisiable = !this.sfshVisiable;
+      if(row){
+        this.shForm = {
+            addtime: row.addtime,
+          qiyebianhao: row.qiyebianhao,
+          qiyemingcheng: row.qiyemingcheng,
+          fuzeren: row.fuzeren,
+          lianxidianhua: row.lianxidianhua,
+          zhaopingangwei: row.zhaopingangwei,
+          zhaopinrenshu: row.zhaopinrenshu,
+          gangweileibie: row.gangweileibie,
+          xueli: row.xueli,
+          tupian: row.tupian,
+          gangweiyaoqiu: row.gangweiyaoqiu,
+          gongzuozhize: row.gongzuozhize,
+          thumbsupnum: row.thumbsupnum,
+          crazilynum: row.crazilynum,
+          shengyurenshu: row.shengyurenshu,
+          endTime: row.endTime,
+          address: row.address,
+          status: row.status,
+          sfhf: row.sfhf,
+          id: row.id
+        }
+      }
+    },
+         // 审核
+         shHandler(){
+           this.$confirm(`确定操作?`, "提示", {
+             confirmButtonText: "确定",
+             cancelButtonText: "取消",
+             type: "warning"
+           }).then(() => {
+             this.$http({
+               url: "zhaopinxinxi/update",
+               method: "post",
+               data: this.shForm
+             }).then(({ data }) => {
+               if (data && data.code === 0) {
+                 this.$message({
+                   message: "操作成功",
+                   type: "success",
+                   duration: 1500,
+                   onClose: () => {
+                     this.getDataList();
+                     this.shDialog()
+                   }
+                 });
+               } else {
+                 this.$message.error(data.msg);
+               }
+             });
+           });
+         },
     // 获取数据列表
     getDataList() {
       this.dataListLoading = true;
